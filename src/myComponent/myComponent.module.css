@@ -17,8 +17,14 @@
 .right{
     width: 30%;
   height: 100%;
-  display: grid;
-  place-items: center;
+  /* display: grid;
+  place-items: center; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  /* background-color: red; */
 }
 
 .left:first-child{

@@ -1,92 +1,117 @@
 import styles from "./myComponent.module.css";
-import { useRef,useEffect } from "react";
-import { Pie } from 'react-chartjs-2';
- import { Chart as ChartJS, CategoryScale, LinearScale, PieController, ArcElement, Title, Tooltip, Legend } from 'chart.js'; 
- ChartJS.register(CategoryScale, LinearScale, PieController, ArcElement, Title, Tooltip, Legend);
+import { useRef,useEffect, useState } from "react";
+ import Chart from "../Chart/Chart";
 
 const MyComponent = () => {
-  const data = {
-    labels: ["Principle", "Interest", ],
-    datasets: [
-      {
-        label: "Ratio of Principle and Interest",
-        data: [3000, 317],
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.5)",
-          "rgba(54, 162, 235, 0.5)",
-        
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-        
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-  const options = {
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
+const [monthlyPay , setMonthlyPay] = useState(45.29);
+const [home , setHome] = useState(3000);
+const [down , setDown] = useState(600);
+const [loan , setLoan] = useState(2400);
+const [interest , setInterest] = useState(5);
+const [tenure , setTenure] = useState(5);
+const [totalInterest , setTotalInterest] = useState(0)
+// console.log("totalInterest",totalInterest);
+
+const fn = () =>{
+  let interestPerMonth = (interest / 100) / 12;
+  let totalLoanMonths = tenure * 12;
+  // console.log("loan" , loan);
+
+ let  monthlyPayment = Number((loan * interestPerMonth *(1 + interestPerMonth) ** totalLoanMonths) / ((1 + interestPerMonth) ** totalLoanMonths - 1)).toFixed(2);
+
+  // console.log("monthlyPayment : ",monthlyPayment);
+  setMonthlyPay(monthlyPayment);
+  
+  let totalInterestGenerated = (monthlyPayment * totalLoanMonths - loan).toFixed(2);
+
+ setTotalInterest(Number(totalInterestGenerated));
+//  console.log("totalInterest",totalInterest);
+ 
+}
 
 
-    const chartRef = useRef(null); 
-    const canvasRef = useRef(null); 
-    useEffect(() => { 
-        if (chartRef.current) {
-             chartRef.current.destroy();
-             } 
-             const ctx = canvasRef.current.getContext('2d'); 
-             chartRef.current = new ChartJS(ctx, { type: 'pie', data, options, });
-              return () => { 
-                if (chartRef.current) 
-                    { chartRef.current.destroy(); 
+const onHome = (e) =>{
+  setHome(e.target.value);
+  let downPay= (20 / 100) * e.target.value;
+  setDown(downPay);
+  let loanAm = e.target.value - downPay;
+  setLoan(loanAm); 
+  
+// fn();
+}
 
-                    } 
-                }; 
-            }, 
-            [data, options]
-        );
+const onDown = (e) =>{
+  setDown(e.target.value);
+  let loanAmount = home - e.target.value;
+  setLoan(loanAmount)
+   
+// fn();
+}
 
+const onLoan = (e) =>{
+  setLoan(e.target.value);
+  let down = home - e.target.value;
+  setDown(down);
+  
+// fn();
+}
+
+const onInterest = (e) =>{
+  setInterest(e.target.value);
+  
+// fn();
+}
+
+
+
+const onTenure = (e) =>{
+  setTenure(e.target.value);
+  // fn();
+}
+
+useEffect(() =>{
+  // console.log("tenure",tenure);
+  
+fn();
+});
+
+
+ 
   return (
     <>
       <div className={styles.container}>
         <div className={styles.left}>
           <div className={styles.box}>
             <h2>Home Value</h2>
-            <p className={styles.value}>$3000</p>
-            <input type="range" min={"1000"} value={"3000"} max={"10000"} />
+            <p className={styles.value}>${home}</p>
+            <input  onChange={onHome} value={home} type="range" min={"1000"}  max={"10000"} step={"100"} />
             <div className={styles.minMax}>
               <p>$1000</p>
-              <p>$10000</p>
+              <p>${home}</p>
             </div>
           </div>
           <div className={styles.box}>
             <h2>Down Payment</h2>
-            <p className={styles.value}>$600</p>
-            <input type="range" min={"0"} value={"600"} max={"3000"} />
+            <p className={styles.value}>${down}</p>
+            <input onChange={onDown} value={down} type="range" min={"0"}  max={home} step={"100"}  />
             <div className={styles.minMax}>
               <p>$0</p>
-              <p>$3000</p>
+              <p>${home}</p>
             </div>
           </div>
           <div className={styles.box}>
             <h2>Loan Amount</h2>
-            <p className={styles.value}>$2400</p>
-            <input type="range" min={"0"} value={"2400"} max={"3000"} />
+            <p className={styles.value}>${loan}</p>
+            <input onChange={onLoan} value={loan} type="range" min={"0"}  max={home} step={"100"}  />
             <div className={styles.minMax}>
               <p>$0</p>
-              <p>$3000</p>
+              <p>${home}</p>
             </div>
           </div>
           <div className={styles.box}>
             <h2>Interest Rate</h2>
-            <p className={styles.value}>5 %</p>
-            <input type="range" min={"5"} value={"18"} max={"10000"} />
+            <p className={styles.value}>{interest} %</p>
+            <input  onChange={onInterest} type="range" min={"2"} value={interest}  max={"18"} />
             <div className={styles.minMax}>
               <p>2 %</p>
               <p>18 %</p>
@@ -95,7 +120,7 @@ const MyComponent = () => {
           <div>
             <fieldset className={styles.field}>
               <legend>Tenure</legend>
-              <select name="" id="year">
+              <select onChange={onTenure} name="" id="year">
                 <option value={"5"}>5 years</option>
                 <option value={"10"}>10 years</option>
                 <option value={"15"}>15 years</option>
@@ -107,7 +132,8 @@ const MyComponent = () => {
         </div>
 
         <div  className={styles.right}>
-        <canvas ref={canvasRef} width="100" height="100"></canvas>
+          
+          <Chart monthlyPay={monthlyPay} setMonthlyPay={setMonthlyPay} totalInterest={totalInterest} setTotalInterest={setTotalInterest}  home={home} fn={fn} />
         </div>
       </div>
     </>
